@@ -5,6 +5,6 @@ First assigment: Implementation of Input-Output library on x86-64 asm.
 
 Second assigment: Implementation of Dictionary data structure on x86-64 asm.
 
-Third assigment: Image transformation app, included rotation, sepia, greyscale and boxbluring filters, also made denoising using median filter.
+Third assigment: Image transformation app, included rotation, sepia, greyscale and boxbluring filters, also made denoising using median filter on C language. TODO: edge detection, threshold filter.
 
-Fourth assigment: Implementation of custom memory allocator.
+Fourth assigment: Implementation of custom memory allocator on C language.
