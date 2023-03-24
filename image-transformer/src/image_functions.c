@@ -127,7 +127,7 @@ struct image median(struct image* const img, const uint8_t radius){
                     uint16_t i = my+radius;
                     uint16_t j = mx+radius;
 
-                    if(x+mx<0 || y+my<0 || x+mx+1 == median_image.width || y+my+1 == median_image.height) continue;
+                    if(x+mx<0 || y+my<0 || x+mx > median_image.width || y+my > median_image.height) continue;
 
                     arrayR[i*(2*radius+1) + j] = get_pixel(img,x+mx,y+my).r;
                     arrayG[i*(2*radius+1) + j] = get_pixel(img,x+mx,y+my).g;

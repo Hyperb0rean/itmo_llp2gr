@@ -111,7 +111,7 @@ int main( int argc, char** argv ) {
 
     *edited_img = greyscale(img);
     //*edited_img = box_blur( img,1);
-    *edited_img = box_blur( edited_img,1);
+    *edited_img = median( edited_img,1);
     //*edited_img = box_blur( edited_img,1);
 
     //*edited_img = sepia(edited_img);
@@ -131,7 +131,7 @@ int main( int argc, char** argv ) {
 
     // Writing from image struct to BMP file
 
-    enum write_status output_file_write_status = to_bmp( out_file, img );
+    enum write_status output_file_write_status = to_bmp( out_file, edited_img );
 
     destroy_image(img);
     destroy_image(edited_img);
