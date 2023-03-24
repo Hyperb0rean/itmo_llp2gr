@@ -6,15 +6,49 @@ static struct pixel get_pixel(const struct image* img, uint64_t x, uint64_t y);
 static void set_pixel(struct image* img, uint64_t x, uint64_t y, struct pixel pixel);
 static int int8_void_comparer_reversed(const void* _x, const void* _y );
 static int int8_comparer_reversed( const int8_t* x, const int8_t* y );
+static void destroy_kernel (struct kernel* ker);
+static struct kernel create_kernel(uint64_t width,uint64_t height);
 
-struct image create_image(uint64_t width, uint64_t height) {
-    struct image img = {
-            .data =  malloc(sizeof(struct pixel) * width * height),
-            .width = width,
-            .height = height
-    };
 
-    return img;
+struct image convolution(struct image* const img, struct kernel* const kernel){
+    if(!img->data) return (struct image) {0};
+    struct image new_image = create_image( img->width, img->height );
+
+    for (uint64_t y = 0; y < new_image.height; ++y) {
+        for (uint64_t x = 0; x < new_image.width; ++x) {
+
+            double_t sumR = 0,sumG = 0,sumB = 0, sumK =0;
+
+
+            for (uint8_t i = 0; i <= kernel->width; ++i) {
+                for (uint8_t j = 0; j <= kernel->height; ++j) {
+
+                    int64_t my = y+(j-(kernel->height)/2);
+                    int64_t mx = x+(i-(kernel->width)/2);
+
+
+                    if(mx<0 || my < 0||
+                            mx >= new_image.width || my >= new_image.height) continue;
+
+                    sumR+= kernel->data[i*kernel->width +j]*get_pixel(img,mx,my).r;
+                    sumG+= kernel->data[i*kernel->width +j]*get_pixel(img,mx,my).g;
+                    sumB+= kernel->data[i*kernel->width +j]*get_pixel(img,mx,my).b;
+                    sumK+=kernel->data[i*kernel->width +j];
+                }
+            }
+
+            if(sumK<=0) sumK=1;
+            sumR/=sumK;
+            sumG/=sumK;
+            sumB/=sumK;
+            set_pixel(&new_image,x,y,(struct pixel) {
+                    .b = (uint8_t) round(sumB<0 ? 0 : sumB>255 ? 255 : sumB),
+                    .g = (uint8_t) round(sumG<0 ? 0 : sumG>255 ? 255 : sumG),
+                    .r = (uint8_t) round(sumR<0 ? 0 : sumR>255 ? 255 : sumR)
+            });
+        }
+    }
+    return new_image;
 }
 
 
@@ -30,6 +64,7 @@ struct image rotate( struct image* const img ){
     return rotated_img;
 }
 
+
 //Implementation of standard negative algorithm:
 //each pixel set on 255 - pixel value
 struct image negative(struct image* const img){
@@ -40,9 +75,9 @@ struct image negative(struct image* const img){
             struct pixel p = get_pixel(img,x,y);
 
             set_pixel(&negatived_img,x,y,(struct pixel) {
-                    .b = 255 - p.b,
-                    .g = 255 - p.g,
-                    .r = 255 - p.r
+                    .b = -p.b,
+                    .g = -p.g,
+                    .r = -p.r
             });
         }
     }
@@ -63,8 +98,6 @@ struct image sepia(struct image* const img){
             uint16_t tr = (uint16_t)round((0.393*(double )p.r) + (0.769*(double )p.g) + (0.189*(double )p.b));
             uint16_t tg = (uint16_t)round((0.349*(double )p.r) + (0.686*(double )p.g) + (0.168*(double )p.b));
             uint16_t tb = (uint16_t)round((0.272*(double )p.r) + (0.534*(double )p.g) + (0.131*(double )p.b));
-
-
 
             set_pixel(&sepia_image,x,y,(struct pixel) {
                     .b = tb>255 ? 255 : tb,
@@ -158,42 +191,34 @@ struct image median(struct image* const img, const uint8_t radius){
 // WARNING: Making radius more than 8 might cause some artifacts
 struct image box_blur(struct image* const img, const uint8_t radius){
     if(!img->data) return (struct image) {0};
-    struct image blur_image = create_image( img->width, img->height );
-
-    for (uint64_t y = 0; y < blur_image.height; y++) {
-        for (uint64_t x = 0; x < blur_image.width; x++) {
-
-            uint16_t sumR = 0;
-            uint16_t sumG = 0;
-            uint16_t sumB = 0;
-
-            uint64_t count = 0;
-
-            for (int16_t my = (int16_t)-radius; my <= radius; ++my) {
-                for (int16_t mx = (int16_t)-radius; mx <= radius; ++mx) {
-
-                    if(x+mx<0 || y+my<0 || x+mx+1 == blur_image.width || y+my+1 == blur_image.height) continue;
-
-                    sumR+= get_pixel(img,x+mx,y+my).r;
-                    sumG+= get_pixel(img,x+mx,y+my).g;
-                    sumB+= get_pixel(img,x+mx,y+my).b;
-
-                    count++;
-                }
-            }
-
-
-            set_pixel(&blur_image,x,y,(struct pixel) {
-                    .b = sumB/count,
-                    .g = sumG/count,
-                    .r = sumR/count
-            });
-
+    struct kernel box_blur_kernel = create_kernel(2*radius+1,2*radius+1);
+    for (int y = 0; y < box_blur_kernel.height; ++y) {
+        for (int x = 0; x < box_blur_kernel.width; ++x) {
+            box_blur_kernel.data[y*box_blur_kernel.width +x] = 1./(box_blur_kernel.width*box_blur_kernel.height);
         }
     }
-    return blur_image;
+    struct image box_blur_image = convolution(img,&box_blur_kernel);
+    destroy_kernel(&box_blur_kernel);
+    return box_blur_image;
 }
 
+
+struct image create_image(uint64_t width, uint64_t height) {
+    struct image img = {
+            .data =  malloc(sizeof(struct pixel) * width * height),
+            .width = width,
+            .height = height
+    };
+
+    return img;
+}
+
+
+void destroy_image (struct image* img){
+    if(!img->data || !img) return;
+    free(img->data);
+    free(img);
+}
 
 static struct pixel get_pixel(const struct image* img, uint64_t x, uint64_t y) {
     return img->data[y*img->width + x];
@@ -203,10 +228,20 @@ static void set_pixel(struct image* img, uint64_t x, uint64_t y, const struct pi
     img->data[y*img->width + x] = pixel;
 }
 
-void destroy_image (struct image* img){
-    if(!img->data || !img) return;
-    free(img->data);
-    free(img);
+static struct kernel create_kernel(uint64_t width,uint64_t height){
+    struct kernel ker = {
+            .data =  malloc(sizeof(double_t) * width * height),
+            .width = width,
+            .height = height
+    };
+
+    return ker;
+}
+
+static void destroy_kernel (struct kernel* ker){
+    if(!ker->data || !ker) return;
+    free(ker->data);
+    //free(ker);
 }
 
 static int int8_comparer_reversed( const int8_t* x, const int8_t* y ) {
