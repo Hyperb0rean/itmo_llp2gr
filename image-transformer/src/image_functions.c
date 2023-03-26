@@ -2,15 +2,32 @@
 
 
 
-static struct pixel get_pixel(const struct image* img, uint64_t x, uint64_t y);
-static void set_pixel(struct image* img, uint64_t x, uint64_t y, struct pixel pixel);
+static struct pixel get_pixel(const struct image* , uint64_t x, uint64_t y);
+static void set_pixel(struct image* , uint64_t x, uint64_t y, struct pixel );
 static int int8_void_comparer_reversed(const void* _x, const void* _y );
 static int int8_comparer_reversed( const int8_t* x, const int8_t* y );
-static void destroy_kernel (struct kernel* ker);
+static void destroy_kernel (struct kernel* );
 static struct kernel create_kernel(uint64_t width,uint64_t height);
+static struct image convolution(struct image* , struct kernel*);
 
 
-struct image convolution(struct image* const img, struct kernel* const kernel){
+
+const double_t idm[] =  {0, 0, 0, 0, 1, 0, 0, 0, 0};
+const double_t ed0m[] =  {1, 0, -1, 0, 0, 0, -1, 0, 1};
+const double_t ed1m[] =  {0, 1, 0, 1, -4, 1, 0, 1, 0};
+const double_t ed2m[] =  {-1., -1., -1., -1., 8., -1., -1., -1., -1.};
+const double_t shrpm[] =  {0, -1, 0, -1, 5, -1, 0, -1, 0};
+const double_t gb3m[] = {0.0625, 0.125, 0.0625, 0.125, 0.25, 0.125, 0.0625, 0.125, 0.0625};
+const double_t embm[] = {-2, -1, 0, -1, 1, 1, 0, 1, 2};
+#define ID   (struct kernel) { .data = (void*)&idm, .height=3, .width=3 }
+#define ED0  (struct kernel) { .data = (void*)&ed0m, .height=3, .width=3 }
+#define ED1  (struct kernel) { .data = (void*)&ed1m, .height=3, .width=3 }
+#define ED2  (struct kernel) { .data = (void*)&ed2m, .height=3, .width=3 }
+#define SHRP (struct kernel) { .data = (void*)&shrpm, .height=3, .width=3 }
+#define GB3  (struct kernel) { .data = (void*)&gb3m, .height=3, .width=3 }
+#define EMB  (struct kernel) { .data = (void*)&embm, .height=3, .width=3 }
+
+static struct image convolution(struct image* const img, struct kernel* const kernel){
     if(!img->data) return (struct image) {0};
     struct image new_image = create_image( img->width, img->height );
 
@@ -202,6 +219,15 @@ struct image box_blur(struct image* const img, const uint8_t radius){
     return box_blur_image;
 }
 
+struct image gaussian_blur(struct image* const img){
+    if(!img->data) return (struct image) {0};
+    return convolution(img,&GB3);
+}
+
+struct image edge_detection(struct image* const img){
+    if(!img->data) return (struct image) {0};
+    return convolution(img,&ED2);
+}
 
 struct image create_image(uint64_t width, uint64_t height) {
     struct image img = {

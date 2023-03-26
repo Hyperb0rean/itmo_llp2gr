@@ -1,4 +1,4 @@
-CFLAGS     = -O2 -Wall -Werror -std=c17
+CFLAGS     = -O2 -Wall  -std=c17
 LDFLAGS    = -lm
 CC         = gcc
 LD         = gcc

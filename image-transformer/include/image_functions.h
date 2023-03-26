@@ -8,7 +8,6 @@
 #include <string.h>
 
 
-
 struct __attribute__((__packed__)) image {
     uint64_t width, height;
     struct pixel* data;
@@ -23,11 +22,10 @@ struct __attribute__((__packed__)) kernel {
     double_t* data;
 };
 
-struct image create_image (uint64_t width, uint64_t height);
+
+
 
 struct image rotate( struct image*  );
-
-struct image convolution(struct image* , struct kernel*);
 
 struct image negative( struct image* );
 
@@ -37,7 +35,13 @@ struct image greyscale( struct  image* );
 
 struct image box_blur( struct  image* , uint8_t radius);
 
+struct image gaussian_blur( struct  image*);
+
+struct image edge_detection(struct image* const img);
+
 struct image median(struct image* , uint8_t radius);
+
+struct image create_image (uint64_t width, uint64_t height);
 
 void destroy_image (struct image* );
 

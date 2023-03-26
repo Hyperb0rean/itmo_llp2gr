@@ -111,9 +111,9 @@ int main( int argc, char** argv ) {
 
 
     *edited_img = greyscale(img);
-    //*edited_img = box_blur( img,1);
-    *edited_img = box_blur( edited_img,3);
-    //*edited_img = sepia(edited_img);
+    *edited_img = median( edited_img,1);
+    //*edited_img = box_blur( edited_img,3);
+    *edited_img = edge_detection(edited_img);
 
 
     //
