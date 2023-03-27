@@ -33,11 +33,13 @@ struct image sepia( struct  image* );
 
 struct image greyscale( struct  image* );
 
+struct image static_treshold(struct image*, uint8_t value);
+
 struct image box_blur( struct  image* , uint8_t radius);
 
 struct image gaussian_blur( struct  image*);
 
-struct image edge_detection(struct image* const img);
+struct image edge_detection(struct image*);
 
 struct image median(struct image* , uint8_t radius);
 

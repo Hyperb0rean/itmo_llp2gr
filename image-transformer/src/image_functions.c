@@ -219,6 +219,26 @@ struct image box_blur(struct image* const img, const uint8_t radius){
     return box_blur_image;
 }
 
+
+struct image static_treshold(struct image* const img, uint8_t value){
+    if(!img->data) return (struct image) {0};
+    struct image treshold_image = create_image( img->width, img->height );
+
+    for (uint64_t y = 0; y < treshold_image.height; y++) {
+        for (uint64_t x = 0; x < treshold_image.width; x++) {
+            struct pixel p = get_pixel(img,x,y);
+            uint8_t brightness = (uint8_t)round(0.299*(double)p.r + 0.587*(double)p.g + 0.114*(double)p.b);
+            brightness = brightness > value ? 255 : 0;
+            set_pixel(&treshold_image,x,y,(struct pixel) {
+                    .b = brightness,
+                    .g = brightness,
+                    .r = brightness
+            });
+        }
+    }
+    return treshold_image;
+}
+
 struct image gaussian_blur(struct image* const img){
     if(!img->data) return (struct image) {0};
     return convolution(img,&GB3);
