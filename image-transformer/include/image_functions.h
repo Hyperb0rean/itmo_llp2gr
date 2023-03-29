@@ -2,10 +2,9 @@
 #ifndef IMAGE_FUNCTIONS_H
 #define IMAGE_FUNCTIONS_H
 
-#include <math.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
+#include "utils.h"
+
+
 
 
 struct __attribute__((__packed__)) image {
@@ -17,13 +16,7 @@ struct __attribute__((packed)) pixel {
     uint8_t b, g, r;
 };
 
-struct __attribute__((__packed__)) kernel {
-    uint8_t width,height;
-    double_t* data;
-};
-
-
-
+struct image convolution(struct image* , struct kernel*);
 
 struct image rotate( struct image*  );
 
@@ -33,7 +26,7 @@ struct image sepia( struct  image* );
 
 struct image greyscale( struct  image* );
 
-struct image static_treshold(struct image*, uint8_t value);
+struct image static_threshold(struct image*, uint8_t value);
 
 struct image box_blur( struct  image* , uint8_t radius);
 

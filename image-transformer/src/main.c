@@ -110,10 +110,10 @@ int main( int argc, char** argv ) {
     //Editing image
 
 
-    *edited_img = box_blur(img,1);
-    //*edited_img = median( edited_img,1);
-    //*edited_img = static_treshold( edited_img,167);
-    //*edited_img = edge_detection(edited_img);
+    *edited_img = greyscale(img);
+    *edited_img = median( edited_img,1);
+    *edited_img = static_threshold( edited_img,167);
+    *edited_img = edge_detection(edited_img);
 
 
     //

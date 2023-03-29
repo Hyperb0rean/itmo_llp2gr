@@ -4,30 +4,18 @@
 
 static struct pixel get_pixel(const struct image* , uint64_t x, uint64_t y);
 static void set_pixel(struct image* , uint64_t x, uint64_t y, struct pixel );
-static int int8_void_comparer_reversed(const void* _x, const void* _y );
-static int int8_comparer_reversed( const int8_t* x, const int8_t* y );
-static void destroy_kernel (struct kernel* );
-static struct kernel create_kernel(uint64_t width,uint64_t height);
-static struct image convolution(struct image* , struct kernel*);
 
 
+extern double_t idm[];
+extern double_t ed0m[];
+extern double_t ed1m[];
+extern double_t ed2m[];
+extern double_t shrpm[];
+extern double_t gb3m[];
+extern double_t embm[];
 
-const double_t idm[] =  {0, 0, 0, 0, 1, 0, 0, 0, 0};
-const double_t ed0m[] =  {1, 0, -1, 0, 0, 0, -1, 0, 1};
-const double_t ed1m[] =  {0, 1, 0, 1, -4, 1, 0, 1, 0};
-const double_t ed2m[] =  {-1., -1., -1., -1., 8., -1., -1., -1., -1.};
-const double_t shrpm[] =  {0, -1, 0, -1, 5, -1, 0, -1, 0};
-const double_t gb3m[] = {0.0625, 0.125, 0.0625, 0.125, 0.25, 0.125, 0.0625, 0.125, 0.0625};
-const double_t embm[] = {-2, -1, 0, -1, 1, 1, 0, 1, 2};
-#define ID   (struct kernel) { .data = (void*)&idm, .height=3, .width=3 }
-#define ED0  (struct kernel) { .data = (void*)&ed0m, .height=3, .width=3 }
-#define ED1  (struct kernel) { .data = (void*)&ed1m, .height=3, .width=3 }
-#define ED2  (struct kernel) { .data = (void*)&ed2m, .height=3, .width=3 }
-#define SHRP (struct kernel) { .data = (void*)&shrpm, .height=3, .width=3 }
-#define GB3  (struct kernel) { .data = (void*)&gb3m, .height=3, .width=3 }
-#define EMB  (struct kernel) { .data = (void*)&embm, .height=3, .width=3 }
 
-static struct image convolution(struct image* const img, struct kernel* const kernel){
+struct image convolution(struct image* const img, struct kernel* const kernel){
     if(!img->data) return (struct image) {0};
     struct image new_image = create_image( img->width, img->height );
 
@@ -222,21 +210,21 @@ struct image box_blur(struct image* const img, const uint8_t radius){
 
 struct image static_threshold(struct image* const img, uint8_t value){
     if(!img->data) return (struct image) {0};
-    struct image treshold_image = create_image( img->width, img->height );
+    struct image threshold_image = create_image( img->width, img->height );
 
-    for (uint64_t y = 0; y < treshold_image.height; y++) {
-        for (uint64_t x = 0; x < treshold_image.width; x++) {
+    for (uint64_t y = 0; y < threshold_image.height; y++) {
+        for (uint64_t x = 0; x < threshold_image.width; x++) {
             struct pixel p = get_pixel(img,x,y);
             uint8_t brightness = (uint8_t)round(0.299*(double)p.r + 0.587*(double)p.g + 0.114*(double)p.b);
             brightness = brightness > value ? 255 : 0;
-            set_pixel(&treshold_image,x,y,(struct pixel) {
+            set_pixel(&threshold_image,x,y,(struct pixel) {
                     .b = brightness,
                     .g = brightness,
                     .r = brightness
             });
         }
     }
-    return treshold_image;
+    return threshold_image;
 }
 
 struct image gaussian_blur(struct image* const img){
@@ -272,30 +260,4 @@ static struct pixel get_pixel(const struct image* img, uint64_t x, uint64_t y) {
 
 static void set_pixel(struct image* img, uint64_t x, uint64_t y, const struct pixel pixel) {
     img->data[y*img->width + x] = pixel;
-}
-
-static struct kernel create_kernel(uint64_t width,uint64_t height){
-    struct kernel ker = {
-            .data =  malloc(sizeof(double_t) * width * height),
-            .width = width,
-            .height = height
-    };
-
-    return ker;
-}
-
-static void destroy_kernel (struct kernel* ker){
-    if(!ker->data || !ker) return;
-    free(ker->data);
-    //free(ker);
-}
-
-static int int8_comparer_reversed( const int8_t* x, const int8_t* y ) {
-    if (*x < *y) return 1;
-    if (*x > *y) return -1;
-    return 0;
-}
-
-static int int8_void_comparer_reversed(const void* _x, const void* _y ) {
-    return int8_comparer_reversed(_x, _y );
 }

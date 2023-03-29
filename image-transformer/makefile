@@ -4,10 +4,10 @@ CC         = gcc
 LD         = gcc
 ASM        = nasm
 ASMFLAGS   =-felf64
-SOURCES	   =./src/main.c ./src/image_functions.c ./src/bmp_image_functions.c ./src/file_functions.c
-INCLUDES   = ./include/image_functions.h ./include/bmp_image_functions.h ./include/bmp_image_header_format.h ./include/file_functions.h
+SOURCES	   =./src/*.c
+INCLUDES   = ./include/*.h
 TARGET = transform
-OBJFILES = main.o image_functions.o bmp_image_functions.o file_functions.o
+OBJFILES = ./*.o
 
 all:
 	make $(TARGET)
