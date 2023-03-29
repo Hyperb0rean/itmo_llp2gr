@@ -220,7 +220,7 @@ struct image box_blur(struct image* const img, const uint8_t radius){
 }
 
 
-struct image static_treshold(struct image* const img, uint8_t value){
+struct image static_threshold(struct image* const img, uint8_t value){
     if(!img->data) return (struct image) {0};
     struct image treshold_image = create_image( img->width, img->height );
 
