@@ -28,4 +28,5 @@ void destroy_kernel (struct kernel* ker);
 
 int int8_void_comparer_reversed(const void* _x, const void* _y );
 
+
 #endif //KERNEL_FUNCTIONS_H
