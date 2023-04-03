@@ -15,7 +15,7 @@ extern double_t gb3m[];
 extern double_t embm[];
 
 
-struct image convolution(struct image* const img, struct kernel* const kernel){
+struct image basic_convolution(struct image* const img, struct kernel* const kernel){
     if(!img->data) return (struct image) {0};
     struct image new_image = create_image( img->width, img->height );
 
@@ -24,16 +24,14 @@ struct image convolution(struct image* const img, struct kernel* const kernel){
 
             double_t sumR = 0,sumG = 0,sumB = 0, sumK =0;
 
-
             for (uint8_t i = 0; i <= kernel->width; ++i) {
                 for (uint8_t j = 0; j <= kernel->height; ++j) {
 
                     int64_t my = y+(j-(kernel->height)/2);
                     int64_t mx = x+(i-(kernel->width)/2);
 
-
                     if(mx<0 || my < 0||
-                            mx >= new_image.width || my >= new_image.height) continue;
+                       mx >= new_image.width || my >= new_image.height) continue;
 
                     sumR+= kernel->data[i*kernel->width +j]*get_pixel(img,mx,my).r;
                     sumG+= kernel->data[i*kernel->width +j]*get_pixel(img,mx,my).g;
@@ -55,6 +53,7 @@ struct image convolution(struct image* const img, struct kernel* const kernel){
     }
     return new_image;
 }
+
 
 
 //Image rotation on 90 degrees
@@ -202,7 +201,7 @@ struct image box_blur(struct image* const img, const uint8_t radius){
             box_blur_kernel.data[y*box_blur_kernel.width +x] = 1./(box_blur_kernel.width*box_blur_kernel.height);
         }
     }
-    struct image box_blur_image = convolution(img,&box_blur_kernel);
+    struct image box_blur_image = basic_convolution(img,&box_blur_kernel);
     destroy_kernel(&box_blur_kernel);
     return box_blur_image;
 }
@@ -229,12 +228,12 @@ struct image static_threshold(struct image* const img, uint8_t value){
 
 struct image gaussian_blur(struct image* const img){
     if(!img->data) return (struct image) {0};
-    return convolution(img,&GB3);
+    return basic_convolution(img,&GB3);
 }
 
 struct image edge_detection(struct image* const img){
     if(!img->data) return (struct image) {0};
-    return convolution(img,&ED2);
+    return basic_convolution(img,&ED2);
 }
 
 struct image create_image(uint64_t width, uint64_t height) {

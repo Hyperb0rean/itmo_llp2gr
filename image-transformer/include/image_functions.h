@@ -2,7 +2,7 @@
 #ifndef IMAGE_FUNCTIONS_H
 #define IMAGE_FUNCTIONS_H
 
-#include "utils.h"
+#include "maths.h"
 
 
 
@@ -16,7 +16,9 @@ struct __attribute__((packed)) pixel {
     uint8_t b, g, r;
 };
 
-struct image convolution(struct image* , struct kernel*);
+
+struct image basic_convolution(struct image* , struct kernel*);
+
 
 struct image rotate( struct image*  );
 
