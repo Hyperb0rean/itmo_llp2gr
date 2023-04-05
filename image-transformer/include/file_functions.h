@@ -2,7 +2,6 @@
 #ifndef FILE_FUNCTIONS_H
 #define FILE_FUNCTIONS_H
 
-
 #include <stdio.h>
 
 enum open_status {

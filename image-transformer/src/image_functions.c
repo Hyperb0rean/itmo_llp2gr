@@ -15,42 +15,10 @@ extern double_t gb3m[];
 extern double_t embm[];
 
 
-struct image basic_convolution(struct image* const img, struct kernel* const kernel){
+struct image image_convolution(struct image* const img, struct kernel* const kernel){
     if(!img->data) return (struct image) {0};
     struct image new_image = create_image( img->width, img->height );
-
-    for (uint64_t y = 0; y < new_image.height; ++y) {
-        for (uint64_t x = 0; x < new_image.width; ++x) {
-
-            double_t sumR = 0,sumG = 0,sumB = 0, sumK =0;
-
-            for (uint8_t i = 0; i <= kernel->width; ++i) {
-                for (uint8_t j = 0; j <= kernel->height; ++j) {
-
-                    int64_t my = y+(j-(kernel->height)/2);
-                    int64_t mx = x+(i-(kernel->width)/2);
-
-                    if(mx<0 || my < 0||
-                       mx >= new_image.width || my >= new_image.height) continue;
-
-                    sumR+= kernel->data[i*kernel->width +j]*get_pixel(img,mx,my).r;
-                    sumG+= kernel->data[i*kernel->width +j]*get_pixel(img,mx,my).g;
-                    sumB+= kernel->data[i*kernel->width +j]*get_pixel(img,mx,my).b;
-                    sumK+=kernel->data[i*kernel->width +j];
-                }
-            }
-
-            if(sumK<=0) sumK=1;
-            sumR/=sumK;
-            sumG/=sumK;
-            sumB/=sumK;
-            set_pixel(&new_image,x,y,(struct pixel) {
-                    .b = (uint8_t) round(sumB<0 ? 0 : sumB>255 ? 255 : sumB),
-                    .g = (uint8_t) round(sumG<0 ? 0 : sumG>255 ? 255 : sumG),
-                    .r = (uint8_t) round(sumR<0 ? 0 : sumR>255 ? 255 : sumR)
-            });
-        }
-    }
+    basic_convolution(img->data,new_image.data,new_image.width,new_image.height,kernel);
     return new_image;
 }
 
@@ -201,7 +169,7 @@ struct image box_blur(struct image* const img, const uint8_t radius){
             box_blur_kernel.data[y*box_blur_kernel.width +x] = 1./(box_blur_kernel.width*box_blur_kernel.height);
         }
     }
-    struct image box_blur_image = basic_convolution(img,&box_blur_kernel);
+    struct image box_blur_image = image_convolution(img,&box_blur_kernel);
     destroy_kernel(&box_blur_kernel);
     return box_blur_image;
 }
@@ -228,12 +196,12 @@ struct image static_threshold(struct image* const img, uint8_t value){
 
 struct image gaussian_blur(struct image* const img){
     if(!img->data) return (struct image) {0};
-    return basic_convolution(img,&GB3);
+    return image_convolution(img,&GB3);
 }
 
 struct image edge_detection(struct image* const img){
     if(!img->data) return (struct image) {0};
-    return basic_convolution(img,&ED2);
+    return image_convolution(img,&ED2);
 }
 
 struct image create_image(uint64_t width, uint64_t height) {

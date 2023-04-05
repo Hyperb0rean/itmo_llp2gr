@@ -7,7 +7,7 @@ ASMFLAGS   =-felf64
 SOURCES	   =./src/*.c
 INCLUDES   = ./include/*.h
 TARGET = transform
-OBJFILES = ./*.o
+OBJFILES = bmp_image_functions.o file_functions.o image_functions.o utils.o main.o maths.o
 
 all:
 	make $(TARGET)
